@@ -2,6 +2,7 @@ package task
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 )
@@ -70,4 +71,42 @@ func GetTask(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNotFound)
 	w.Write([]byte("Task not found"))
+}
+
+func CreateTask(w http.ResponseWriter, r *http.Request) {
+	// read body
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error reading body"))
+		return
+	}
+
+	// validate the fields
+	var task Task
+	err = json.Unmarshal(body, &task)
+	if err != nil {
+		log.Fatal(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error unmarshalling body"))
+		return
+	}
+
+	// create the task
+	tasks = append(tasks, task)
+
+	// prepare response
+	response, err := json.Marshal(task)
+	if err != nil {
+		log.Fatal(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error marshalling task"))
+		return
+	}
+
+	// return the task
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(response)
 }
