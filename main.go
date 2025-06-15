@@ -83,6 +83,19 @@ func RegisterRoutes(mux *http.ServeMux) {
 
 	mux.Handle("/", helloWorld)
 	mux.Handle("/health", health)
-	mux.Handle("/tasks", http.HandlerFunc(task.GetTasks))
+
+	// Handle /tasks with method routing
+	mux.HandleFunc("/tasks", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			task.GetTasks(w, r)
+		case http.MethodPost:
+			task.CreateTask(w, r)
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			w.Write([]byte("Method not allowed"))
+		}
+	})
+
 	mux.Handle("/tasks/{id}", http.HandlerFunc(task.GetTask))
 }
