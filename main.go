@@ -9,6 +9,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/WaldemarEnns/go-task-manager/domains/task"
 )
 
 type ServerConfig struct {
@@ -81,4 +83,6 @@ func RegisterRoutes(mux *http.ServeMux) {
 
 	mux.Handle("/", helloWorld)
 	mux.Handle("/health", health)
+	mux.Handle("/tasks", http.HandlerFunc(task.GetTasks))
+	mux.Handle("/tasks/{id}", http.HandlerFunc(task.GetTask))
 }
